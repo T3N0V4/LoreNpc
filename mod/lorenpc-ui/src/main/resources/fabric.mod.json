@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "lorenpc_ui",
+  "version": "${version}",
+  "name": "LoreNPC UI",
+  "description": "Interfaz de dialogos para LoreNPC",
+  "authors": ["T3N0V4"],
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.t3n0v4.lorenpc.LoreNPC"
+    ],
+    "client": [
+      "io.github.t3n0v4.lorenpc.client.LoreNPCClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
