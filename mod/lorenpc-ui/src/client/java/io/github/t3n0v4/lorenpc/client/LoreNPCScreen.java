@@ -4,31 +4,36 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.RenderPipelines;
 
 public class LoreNPCScreen extends Screen {
 
     private final String npcName;
     private String answer = "Seleccioná una pregunta para comenzar.";
 
-    private static final String[] QUESTIONS = {
-        "¿Quién sos?",
-        "¿Qué pasó en este lugar?",
-        "¿Hay algún peligro?"
-    };
+    private final String[] questions;
+    private final String[] answers;
+    private static final Identifier DIALOG_PANEL_TEXTURE =
+        Identifier.fromNamespaceAndPath(
+            "lorenpc_ui", "textures/gui/dialog_panel.png");
 
-    private static final String[] ANSWERS = {
-        "Soy El Testigo. Llevo muchos años aquí.",
-        "Hace cien años, este pueblo desapareció.",
-        "No salgas cuando caiga la noche."
-    };
+    private static final Identifier DIALOG_BUTTON_TEXTURE =
+        Identifier.fromNamespaceAndPath(
+            "lorenpc_ui", "textures/gui/dialog_button.png");
 
+    private static final Identifier DIALOG_BUTTON_HOVER_TEXTURE =
+        Identifier.fromNamespaceAndPath(
+            "lorenpc_ui", "textures/gui/dialog_button_hover.png");
     private int panelX;
     private int panelY;
     private int panelWidth;
 
-    public LoreNPCScreen(String npcName) {
+    public LoreNPCScreen(String npcName, String[] questions, String[] answers) {
         super(Component.literal("LoreNPC"));
         this.npcName = npcName;
+        this.questions = questions.clone();
+        this.answers = answers.clone();
     }
 
     @Override
@@ -40,13 +45,13 @@ public class LoreNPCScreen extends Screen {
         int buttonX = panelX + 20;
         int buttonWidth = panelWidth - 40;
 
-        for (int i = 0; i < QUESTIONS.length; i++) {
+        for (int i = 0; i < questions.length; i++) {
             final int selected = i;
 
             this.addRenderableWidget(
                 Button.builder(
-                    Component.literal(QUESTIONS[i]),
-                    button -> answer = ANSWERS[selected]
+                    Component.literal(questions[i]),
+                    button -> answer = answers[selected]
                 )
                 .bounds(buttonX, panelY + 112 + i * 25, buttonWidth, 20)
                 .build()
@@ -89,17 +94,15 @@ public class LoreNPCScreen extends Screen {
         int y = panelY;
         int w = panelWidth;
 
-        // Sombra
-        graphics.fill(x + 4, y + 4, x + w + 4, y + 228,
-            0x66000000);
-
-        // Panel semitransparente
-        graphics.fill(x, y, x + w, y + 224,
-            0xDD171C20);
-
-        // Borde superior
-        graphics.fill(x, y, x + w, y + 2,
-            0xFFB9A06A);
+        // Marco medieval
+        graphics.blit(
+            RenderPipelines.GUI_TEXTURED,
+            DIALOG_PANEL_TEXTURE,
+            x, y,
+            0, 0,
+            w, 224,
+            1254, 1254
+        );
 
         // Encabezado
         graphics.text(
@@ -156,6 +159,72 @@ public class LoreNPCScreen extends Screen {
         );
 
         super.extractRenderState(graphics, mouseX, mouseY, delta);
+
+        int buttonX = x + 20;
+        int buttonWidth = w - 40;
+
+        for (int i = 0; i < questions.length; i++) {
+            int by = y + 112 + i * 25;
+
+            boolean hovered =
+                mouseX >= buttonX &&
+                mouseX < buttonX + buttonWidth &&
+                mouseY >= by &&
+                mouseY < by + 20;
+
+            Identifier texture = hovered
+                ? DIALOG_BUTTON_HOVER_TEXTURE
+                : DIALOG_BUTTON_TEXTURE;
+
+            graphics.blit(
+                RenderPipelines.GUI_TEXTURED,
+                texture,
+                buttonX, by,
+                0, 0,
+                buttonWidth, 20,
+                2172, 724
+            );
+
+            int textWidth = this.font.width(questions[i]);
+
+            graphics.text(
+                this.font,
+                questions[i],
+                buttonX + (buttonWidth - textWidth) / 2,
+                by + 6,
+                hovered ? 0xFFFFE7AA : 0xFFF3DEC1,
+                true
+            );
+        }
+
+        int exitX = x + w - 105;
+        int exitY = y + 195;
+
+        boolean exitHovered =
+            mouseX >= exitX &&
+            mouseX < exitX + 85 &&
+            mouseY >= exitY &&
+            mouseY < exitY + 20;
+
+        graphics.blit(
+            RenderPipelines.GUI_TEXTURED,
+            exitHovered
+                ? DIALOG_BUTTON_HOVER_TEXTURE
+                : DIALOG_BUTTON_TEXTURE,
+            exitX, exitY,
+            0, 0,
+            85, 20,
+            2172, 724
+        );
+
+        graphics.text(
+            this.font,
+            "Despedirse",
+            exitX + (85 - this.font.width("Despedirse")) / 2,
+            exitY + 6,
+            0xFFF3DEC1,
+            true
+        );
     }
 
     @Override

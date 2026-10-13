@@ -30,3 +30,5 @@ server.properties
 __pycache__/
 *.pyc
 .venv/
+# Compilaciones Java / Fabric
+*.jar

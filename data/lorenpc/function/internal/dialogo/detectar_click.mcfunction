@@ -1,13 +1,13 @@
-# Ejecutado como la entidad interaction que recibió el clic.
+# LoreNPC - Clic derecho sobre un NPC
 
-# Recordar el ID del NPC.
+# Guardar el ID de la entidad seleccionada.
 scoreboard players operation #clicked ln_id = @s ln_id
 
-# Asignar ese ID al jugador que hizo clic.
+# Asignar ID al jugador.
 execute on target run scoreboard players operation @s ln_active = #clicked ln_id
 
-# Abrir el diálogo para ese jugador.
-execute on target run function lorenpc:internal/dialogo/open
+# Solicitar que el mod abra la interfaz.
+execute on target run scoreboard players set @s ln_open 1
 
-# Limpiar el clic para no repetirlo en el siguiente tick.
+# Consumir el clic.
 data remove entity @s interaction
