@@ -5,6 +5,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.resources.Identifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,18 @@ public class LoreNPCScreen extends Screen {
             "lorenpc_ui", "textures/gui/dialog_button_hover.png"
         );
 
+    private static final Identifier MEDIEVAL = Identifier.fromNamespaceAndPath("lorenpc_ui", "medieval");
+
+    private Component oldScript(String value) {
+        return Component.literal(value).withStyle(s -> s.withFont(new FontDescription.Resource(MEDIEVAL)));
+    }
+
+    private String visibleLabel(String value, int maxWidth) {
+        if (font.width(oldScript(value)) <= maxWidth) return value;
+        int n = value.length();
+        while (n > 0 && font.width(oldScript(value.substring(0, n) + "...")) > maxWidth) n--;
+        return value.substring(0, n) + "...";
+    }
     private final String npcName;
     private final String[] questions;
     private final String[] answers;
@@ -237,11 +250,12 @@ public class LoreNPCScreen extends Screen {
         );
 
         // Texto centrado sobre el pergamino.
-        int textWidth = font.width(label);
+        label = visibleLabel(label, w - 25);
+        int textWidth = font.width(oldScript(label));
 
         graphics.text(
             font,
-            label,
+            oldScript(label),
             x + (w - textWidth) / 2,
             y + (h - 8) / 2,
             hovered ? 0xFFFFE3A6 : 0xFFE5C99A,
@@ -273,8 +287,8 @@ public class LoreNPCScreen extends Screen {
         // Nombre del NPC
         graphics.text(
             font,
-            npcName,
-            x + (w - font.width(npcName)) / 2,
+            oldScript(visibleLabel(npcName, w - 76)),
+            x + (w - font.width(oldScript(visibleLabel(npcName, w - 76)))) / 2,
             y + 39,
             0xFFFFDC98,
             true
@@ -292,7 +306,7 @@ public class LoreNPCScreen extends Screen {
 
         graphics.text(
             font,
-            npcName + ":",
+            oldScript(visibleLabel(npcName + ":", w - 80)),
             x + 40,
             y + 75,
             0xFFFFD88E,
@@ -345,15 +359,15 @@ public class LoreNPCScreen extends Screen {
                     ? word
                     : line + " " + word;
 
-                if (font.width(candidate) > maxWidth && !line.isEmpty()) {
+                if (font.width(oldScript(candidate)) > maxWidth && !line.isEmpty()) {
                     lines.add(line.toString());
                     line.setLength(0);
                 }
 
-                if (font.width(word) > maxWidth) {
+                if (font.width(oldScript(word)) > maxWidth) {
                     for (char c : word.toCharArray()) {
                         if (!line.isEmpty() &&
-                            font.width(line.toString() + c) > maxWidth) {
+                            font.width(oldScript(line.toString() + c)) > maxWidth) {
                             lines.add(line.toString());
                             line.setLength(0);
                         }
@@ -390,7 +404,7 @@ public class LoreNPCScreen extends Screen {
         for (int i = start; i < end; i++) {
             graphics.text(
                 font,
-                lines.get(i),
+                oldScript(lines.get(i)),
                 x,
                 y + (i - start) * 11,
                 0xFFF2DFC3,
@@ -408,7 +422,7 @@ public class LoreNPCScreen extends Screen {
 
             graphics.text(
                 font,
-                nextLabel + " (" + (answerPage + 1) + "/" + pageCount + ")",
+                oldScript(nextLabel + " (" + (answerPage + 1) + "/" + pageCount + ")"),
                 buttonX,
                 buttonY + 4,
                 0xFFE7BF79,
