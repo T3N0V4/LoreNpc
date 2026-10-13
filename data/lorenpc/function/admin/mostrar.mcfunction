@@ -1,17 +1,21 @@
+# LoreNPC - Recuperar NPC
 # Argumento: id
 
+# Comprobar que existe.
+$execute unless data storage lorenpc:db npcs.n$(id) run tellraw @s {text:"[LoreNPC] El NPC no existe.",color:"red"}
 $execute unless data storage lorenpc:db npcs.n$(id) run return fail
 
-$scoreboard players set #target ln_id $(id)
-function lorenpc:internal/npc/buscar_visible
+# Solo permitir NPC ocultos.
+$execute unless data storage lorenpc:db npcs.n$(id){hidden:1b} run tellraw @s {text:"[LoreNPC] Este NPC no esta oculto.",color:"red"}
+$execute unless data storage lorenpc:db npcs.n$(id){hidden:1b} run return fail
 
-execute if score #found ln_id matches 1 run tellraw @s {text:"[LoreNPC] Ese NPC ya esta visible.",color:"red"}
-execute if score #found ln_id matches 1 run return fail
+# Exigir coordenadas originales.
+$execute unless data storage lorenpc:db npcs.n$(id).location.pos run tellraw @s {text:"[LoreNPC] Este NPC no tiene una ubicacion guardada.",color:"red"}
+$execute unless data storage lorenpc:db npcs.n$(id).location.pos run return fail
 
-$data modify storage lorenpc:runtime spawn_args set value {id:$(id)}
-$data modify storage lorenpc:runtime spawn_args.nombre set from storage lorenpc:db npcs.n$(id).nombre
+$execute unless data storage lorenpc:db npcs.n$(id).location.dimension run tellraw @s {text:"[LoreNPC] Este NPC no tiene dimension guardada.",color:"red"}
+$execute unless data storage lorenpc:db npcs.n$(id).location.dimension run return fail
 
-function lorenpc:internal/npc/spawn with storage lorenpc:runtime spawn_args
-
-$data modify storage lorenpc:db npcs.n$(id).hidden set value 0b
-tellraw @s {text:"[LoreNPC] NPC recuperado.",color:"green"}
+# La recuperacion por coordenadas se implementara en el mod.
+# No generar entidades nuevas en la posicion del administrador.
+tellraw @s {text:"[LoreNPC] Ubicacion encontrada. Recuperacion pendiente de habilitar.",color:"yellow"}

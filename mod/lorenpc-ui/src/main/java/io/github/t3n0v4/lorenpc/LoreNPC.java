@@ -3,7 +3,6 @@ package io.github.t3n0v4.lorenpc;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import io.github.t3n0v4.lorenpc.network.OpenRequestPayload;
 import io.github.t3n0v4.lorenpc.network.OpenResponsePayload;
 
 import net.fabricmc.api.ModInitializer;
@@ -32,28 +31,10 @@ public class LoreNPC implements ModInitializer {
     @Override
     public void onInitialize() {
 
-        PayloadTypeRegistry.serverboundPlay().register(
-            OpenRequestPayload.TYPE,
-            OpenRequestPayload.CODEC
-        );
 
         PayloadTypeRegistry.clientboundPlay().register(
             OpenResponsePayload.TYPE,
             OpenResponsePayload.CODEC
-        );
-
-        // Tecla J: sigue disponible para depuracion.
-        ServerPlayNetworking.registerGlobalReceiver(
-            OpenRequestPayload.TYPE,
-            (payload, context) -> {
-                context.server().execute(() ->
-                    enviarDialogo(
-                        context.server(),
-                        context.player(),
-                        payload.npcId()
-                    )
-                );
-            }
         );
 
         // Clic derecho detectado por el datapack.
@@ -81,7 +62,7 @@ public class LoreNPC implements ModInitializer {
             var openScore =
                 scoreboard.getPlayerScoreInfo(player, openObjective);
 
-            if (openScore == null || openScore.value() != 1) {
+            if (openScore == null || openScore.value() <= 0) {
                 continue;
             }
 
@@ -133,6 +114,11 @@ public class LoreNPC implements ModInitializer {
             return;
         }
 
+        // Los NPC ocultos no deben abrir conversaciones.
+        if (npc.getBooleanOr("hidden", false)) {
+            return;
+        }
+
         String nombre = npc.getString("nombre").orElse("NPC");
         String preguntas = crearDialogoJson(npc);
 
@@ -151,11 +137,7 @@ public class LoreNPC implements ModInitializer {
             new OpenResponsePayload(nombre, preguntas)
         );
 
-        LOGGER.info(
-            "LoreNPC: enviado dialogo del NPC {} ({})",
-            npcId,
-            nombre
-        );
+
     }
 
     private static String crearDialogoJson(CompoundTag npc) {
@@ -171,10 +153,10 @@ public class LoreNPC implements ModInitializer {
                 slots.getCompoundOrEmpty("n" + i);
 
             String pregunta =
-                slot.getString("q").orElse("");
+                limitarTexto(slot.getString("q").orElse(""), 256);
 
             String respuesta =
-                slot.getString("a").orElse("");
+                limitarTexto(slot.getString("a").orElse(""), 4096);
 
             if (pregunta.isBlank()) {
                 continue;
@@ -190,5 +172,15 @@ public class LoreNPC implements ModInitializer {
         }
 
         return preguntas.toString();
+    }
+
+    private static String limitarTexto(String texto, int maximo) {
+        if (texto == null) {
+            return "";
+        }
+
+        return texto.length() <= maximo
+            ? texto
+            : texto.substring(0, maximo);
     }
 }

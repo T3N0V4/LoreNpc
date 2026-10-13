@@ -1,7 +1,9 @@
 # LoreNPC - Actualizacion principal
 
 # Detectar clic derecho en los NPC.
-execute as @e[type=minecraft:interaction,tag=ln_click,nbt={interaction:{}}] run function lorenpc:internal/dialogo/detectar_click
+execute in minecraft:overworld as @e[type=minecraft:interaction,tag=ln_click,nbt={interaction:{}}] run function lorenpc:internal/dialogo/detectar_click
+execute in minecraft:the_nether as @e[type=minecraft:interaction,tag=ln_click,nbt={interaction:{}}] run function lorenpc:internal/dialogo/detectar_click
+execute in minecraft:the_end as @e[type=minecraft:interaction,tag=ln_click,nbt={interaction:{}}] run function lorenpc:internal/dialogo/detectar_click
 
 # Limpiar entidades invalidas cada 20 ticks.
 scoreboard players add #cleanup ln_id 1

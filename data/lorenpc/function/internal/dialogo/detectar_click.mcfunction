@@ -1,13 +1,15 @@
-# LoreNPC - Clic derecho sobre un NPC
+# LoreNPC - Detectar interaccion del jugador.
+# @s es la entidad interaction que recibio el clic.
 
-# Guardar el ID de la entidad seleccionada.
-scoreboard players operation #clicked ln_id = @s ln_id
+# Solo IDs administrativos validos.
+execute unless score @s ln_id matches 1..1000000 run data remove entity @s interaction
+execute unless score @s ln_id matches 1..1000000 run return 0
 
-# Asignar ID al jugador.
-execute on target run scoreboard players operation @s ln_active = #clicked ln_id
+# Preparar el identificador del NPC.
+execute store result storage lorenpc:runtime click.id int 1 run scoreboard players get @s ln_id
 
-# Solicitar que el mod abra la interfaz.
-execute on target run scoreboard players set @s ln_open 1
+# Validar antes de generar una solicitud de apertura.
+function lorenpc:internal/dialogo/validar_click with storage lorenpc:runtime click
 
-# Consumir el clic.
+# Consumir siempre el clic, incluso cuando fue rechazado.
 data remove entity @s interaction

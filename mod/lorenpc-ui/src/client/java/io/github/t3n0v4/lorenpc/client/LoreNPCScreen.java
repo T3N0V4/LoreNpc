@@ -6,6 +6,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoreNPCScreen extends Screen {
 
@@ -29,6 +31,9 @@ public class LoreNPCScreen extends Screen {
     private final String[] answers;
 
     private String answer = "Seleccioná una pregunta para comenzar.";
+
+    private int answerPage = 0;
+    private static final int LINES_PER_PAGE = 3;
 
     private int panelX;
     private int panelY;
@@ -66,7 +71,7 @@ public class LoreNPCScreen extends Screen {
             addRenderableWidget(
                 Button.builder(
                     Component.empty(),
-                    button -> answer = answers[selected]
+                    button -> { answer = answers[selected]; answerPage = 0; }
                 )
                 .bounds(
                     bx,
@@ -77,6 +82,20 @@ public class LoreNPCScreen extends Screen {
                 .build()
             );
         }
+
+        addRenderableWidget(
+            Button.builder(
+                Component.empty(),
+                button -> {
+                    int total = wrapAnswer(answer, panelWidth - 80).size();
+                    int pages = Math.max(1,
+                        (total + LINES_PER_PAGE - 1) / LINES_PER_PAGE);
+                    answerPage = (answerPage + 1) % pages;
+                }
+            )
+            .bounds(panelX + panelWidth - 115, panelY + 124, 85, 18)
+            .build()
+        );
 
         addRenderableWidget(
             Button.builder(
@@ -197,19 +216,27 @@ public class LoreNPCScreen extends Screen {
         int mouseX,
         int mouseY
     ) {
-
         boolean hovered =
             mouseX >= x && mouseX < x + w &&
             mouseY >= y && mouseY < y + h;
 
-        nineSlice(
-            graphics,
-            hovered ? BUTTON_HOVER : BUTTON,
-            x, y, w, h,
-            2172, 724,
-            180, 9
+        // Resaltado sutil, como una ranura iluminada.
+        if (hovered) {
+            graphics.fill(
+                x + 4, y + 2,
+                x + w - 4, y + h - 2,
+                0x443D2812
+            );
+        }
+
+        // Linea inferior grabada.
+        graphics.fill(
+            x + 12, y + h - 2,
+            x + w - 12, y + h - 1,
+            hovered ? 0xFFBE9756 : 0x66583E25
         );
 
+        // Texto centrado sobre el pergamino.
         int textWidth = font.width(label);
 
         graphics.text(
@@ -217,11 +244,10 @@ public class LoreNPCScreen extends Screen {
             label,
             x + (w - textWidth) / 2,
             y + (h - 8) / 2,
-            hovered ? 0xFFFFE9B6 : 0xFFF2DFC3,
+            hovered ? 0xFFFFE3A6 : 0xFFE5C99A,
             true
         );
     }
-
     @Override
     public void extractRenderState(
         GuiGraphicsExtractor graphics,
@@ -248,22 +274,14 @@ public class LoreNPCScreen extends Screen {
         graphics.text(
             font,
             npcName,
-            x + 38,
-            y + 37,
+            x + (w - font.width(npcName)) / 2,
+            y + 39,
             0xFFFFDC98,
             true
         );
 
-        graphics.text(
-            font,
-            "CONVERSACIÓN",
-            x + 38,
-            y + 52,
-            0xFFC5AD89,
-            false
-        );
 
-        // Zona de respuesta
+// Zona de respuesta
         graphics.fill(
             x + 33,
             y + 74,
@@ -276,27 +294,14 @@ public class LoreNPCScreen extends Screen {
             font,
             npcName + ":",
             x + 40,
-            y + 80,
+            y + 75,
             0xFFFFD88E,
             true
         );
 
-        graphics.textWithWordWrap(
-            font,
-            Component.literal(answer),
-            x + 40,
-            y + 95,
-            w - 80,
-            0xFFF9E8D0
-        );
+        drawAnswerPages(graphics, x + 40, y + 95, w - 80);
 
-        // Los botones siguen gestionando los clics.
-        super.extractRenderState(
-            graphics,
-            mouseX,
-            mouseY,
-            delta
-        );
+        // Los widgets mantienen los clics, pero no dibujamos su aspecto vanilla.
 
         // Aspecto medieval de las opciones
         for (int i = 0; i < questions.length; i++) {
@@ -326,6 +331,91 @@ public class LoreNPCScreen extends Screen {
         );
     }
 
+
+    private List<String> wrapAnswer(String text, int maxWidth) {
+        List<String> lines = new ArrayList<>();
+
+        for (String paragraph : text.split("\n", -1)) {
+            StringBuilder line = new StringBuilder();
+
+            for (String word : paragraph.split(" ")) {
+                if (word.isEmpty()) continue;
+
+                String candidate = line.isEmpty()
+                    ? word
+                    : line + " " + word;
+
+                if (font.width(candidate) > maxWidth && !line.isEmpty()) {
+                    lines.add(line.toString());
+                    line.setLength(0);
+                }
+
+                if (font.width(word) > maxWidth) {
+                    for (char c : word.toCharArray()) {
+                        if (!line.isEmpty() &&
+                            font.width(line.toString() + c) > maxWidth) {
+                            lines.add(line.toString());
+                            line.setLength(0);
+                        }
+                        line.append(c);
+                    }
+                } else {
+                    if (!line.isEmpty()) line.append(' ');
+                    line.append(word);
+                }
+            }
+
+            lines.add(line.toString());
+        }
+
+        return lines;
+    }
+
+    private void drawAnswerPages(
+        GuiGraphicsExtractor graphics,
+        int x,
+        int y,
+        int maxWidth
+    ) {
+        List<String> lines = wrapAnswer(answer, maxWidth);
+
+        int pageCount = Math.max(1,
+            (lines.size() + LINES_PER_PAGE - 1) / LINES_PER_PAGE);
+
+        answerPage = Math.min(answerPage, pageCount - 1);
+
+        int start = answerPage * LINES_PER_PAGE;
+        int end = Math.min(start + LINES_PER_PAGE, lines.size());
+
+        for (int i = start; i < end; i++) {
+            graphics.text(
+                font,
+                lines.get(i),
+                x,
+                y + (i - start) * 11,
+                0xFFF2DFC3,
+                true
+            );
+        }
+
+        if (pageCount > 1) {
+            String nextLabel = answerPage + 1 < pageCount
+                ? "Siguiente >"
+                : "Volver al inicio";
+
+            int buttonX = panelX + panelWidth - 115;
+            int buttonY = panelY + 124;
+
+            graphics.text(
+                font,
+                nextLabel + " (" + (answerPage + 1) + "/" + pageCount + ")",
+                buttonX,
+                buttonY + 4,
+                0xFFE7BF79,
+                true
+            );
+        }
+    }
     @Override
     public void onClose() {
         minecraft.gui.setScreen(null);
