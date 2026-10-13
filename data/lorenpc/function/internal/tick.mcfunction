@@ -10,3 +10,8 @@ scoreboard players set @a[scores={ln_choice=1..}] ln_choice 0
 scoreboard players add #cleanup ln_id 1
 execute if score #cleanup ln_id matches 20.. run function lorenpc:internal/npc/limpiar_entidades
 execute if score #cleanup ln_id matches 20.. run scoreboard players set #cleanup ln_id 0
+
+# Actualizar orientacion cada 5 ticks.
+scoreboard players add #look ln_id 1
+execute if score #look ln_id matches 5.. run function lorenpc:internal/npc/mirar_jugador
+execute if score #look ln_id matches 5.. run scoreboard players set #look ln_id 0
