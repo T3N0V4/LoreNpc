@@ -41,6 +41,7 @@ public class LoreNPC implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(
             LoreNPC::revisarClicks
         );
+        RecoveryRequests.register();
 
         LOGGER.info("LoreNPC UI: detector de clic registrado.");
     }
@@ -79,6 +80,11 @@ public class LoreNPC implements ModInitializer {
             }
 
             int npcId = activeScore.value();
+
+            // Evitar reutilizar el ID de una conversacion anterior.
+            scoreboard.getOrCreatePlayerScore(
+                player, activeObjective
+            ).set(0);
 
             LOGGER.info(
                 "LoreNPC: clic derecho de {} sobre NPC {}",

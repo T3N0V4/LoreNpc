@@ -1,7 +1,8 @@
 # Argumentos: id, nombre
 
 $scoreboard players set #target ln_id $(id)
-execute unless score #target ln_id matches 1.. run return fail
+execute unless score #target ln_id matches 1..1000000 run tellraw @s {text:"[LoreNPC] El ID debe estar entre 1 y 1000000.",color:"red"}
+execute unless score #target ln_id matches 1..1000000 run return fail
 
 $execute if data storage lorenpc:db npcs.n$(id) run tellraw @s {text:"[LoreNPC] Ese ID ya existe.",color:"red"}
 $execute if data storage lorenpc:db npcs.n$(id) run return fail
