@@ -1,0 +1,13 @@
+{
+  "pack": {
+    "min_format": [
+      121,
+      0
+    ],
+    "max_format": [
+      121,
+      0
+    ],
+    "description": "LoreNPC - NPC editables (Minecraft 26.3)"
+  }
+}

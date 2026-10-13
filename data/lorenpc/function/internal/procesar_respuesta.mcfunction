@@ -1,0 +1,1 @@
+# LoreNPC - procesar_respuesta

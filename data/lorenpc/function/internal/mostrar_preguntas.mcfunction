@@ -1,0 +1,1 @@
+# LoreNPC - mostrar_preguntas
