@@ -13,4 +13,5 @@ $data modify storage lorenpc:runtime spawn_args.nombre set from storage lorenpc:
 
 function lorenpc:internal/npc/spawn with storage lorenpc:runtime spawn_args
 
+$data modify storage lorenpc:db npcs.n$(id).hidden set value 0b
 tellraw @s {text:"[LoreNPC] NPC recuperado.",color:"green"}
