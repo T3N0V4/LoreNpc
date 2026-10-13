@@ -1,30 +1,26 @@
 # Macro: id
-# Carga los datos y genera las preguntas.
+# @s es el jugador que hizo clic derecho.
 
-$data modify storage lorenpc:runtime npc set from storage lorenpc:db npcs.n$(id)
+# Ventana base.
+data modify storage lorenpc:runtime ui set value {dialog:{type:"minecraft:multi_action",title:"LoreNPC",columns:1,pause:false,can_close_with_escape:true,actions:[],exit_action:{label:"Cerrar"}}}
 
-data modify storage lorenpc:runtime render set value {}
-data modify storage lorenpc:runtime render.nombre set from storage lorenpc:runtime npc.nombre
+# Nombre del NPC.
+$data modify storage lorenpc:runtime ui.dialog.title set from storage lorenpc:db npcs.n$(id).nombre
 
-tellraw @s {text:"------------------------",color:"dark_gray"}
+# Pregunta 1.
+$execute if data storage lorenpc:db npcs.n$(id).questions.n0.q run data modify storage lorenpc:runtime ui.dialog.actions append value {label:"",action:{type:"minecraft:run_command",command:"/trigger ln_choice set 1"}}
+$execute if data storage lorenpc:db npcs.n$(id).questions.n0.q run data modify storage lorenpc:runtime ui.dialog.actions[-1].label set from storage lorenpc:db npcs.n$(id).questions.n0.q
 
-function lorenpc:internal/dialogo/render_nombre with storage lorenpc:runtime render
+# Pregunta 2.
+$execute if data storage lorenpc:db npcs.n$(id).questions.n1.q run data modify storage lorenpc:runtime ui.dialog.actions append value {label:"",action:{type:"minecraft:run_command",command:"/trigger ln_choice set 2"}}
+$execute if data storage lorenpc:db npcs.n$(id).questions.n1.q run data modify storage lorenpc:runtime ui.dialog.actions[-1].label set from storage lorenpc:db npcs.n$(id).questions.n1.q
 
-tellraw @s {text:"Elegí una pregunta:",color:"yellow"}
+# Pregunta 3.
+$execute if data storage lorenpc:db npcs.n$(id).questions.n2.q run data modify storage lorenpc:runtime ui.dialog.actions append value {label:"",action:{type:"minecraft:run_command",command:"/trigger ln_choice set 3"}}
+$execute if data storage lorenpc:db npcs.n$(id).questions.n2.q run data modify storage lorenpc:runtime ui.dialog.actions[-1].label set from storage lorenpc:db npcs.n$(id).questions.n2.q
 
-# Primera pregunta
-execute if data storage lorenpc:runtime npc.questions.n0.q run data modify storage lorenpc:runtime render set value {numero:1}
-execute if data storage lorenpc:runtime npc.questions.n0.q run data modify storage lorenpc:runtime render.texto set from storage lorenpc:runtime npc.questions.n0.q
-execute if data storage lorenpc:runtime npc.questions.n0.q run function lorenpc:internal/dialogo/render_pregunta with storage lorenpc:runtime render
+# Si no hay preguntas, mostrar un botón informativo.
+execute unless data storage lorenpc:runtime ui.dialog.actions[0] run data modify storage lorenpc:runtime ui.dialog.actions append value {label:"No tiene preguntas disponibles"}
 
-# Segunda pregunta
-execute if data storage lorenpc:runtime npc.questions.n1.q run data modify storage lorenpc:runtime render set value {numero:2}
-execute if data storage lorenpc:runtime npc.questions.n1.q run data modify storage lorenpc:runtime render.texto set from storage lorenpc:runtime npc.questions.n1.q
-execute if data storage lorenpc:runtime npc.questions.n1.q run function lorenpc:internal/dialogo/render_pregunta with storage lorenpc:runtime render
-
-# Tercera pregunta
-execute if data storage lorenpc:runtime npc.questions.n2.q run data modify storage lorenpc:runtime render set value {numero:3}
-execute if data storage lorenpc:runtime npc.questions.n2.q run data modify storage lorenpc:runtime render.texto set from storage lorenpc:runtime npc.questions.n2.q
-execute if data storage lorenpc:runtime npc.questions.n2.q run function lorenpc:internal/dialogo/render_pregunta with storage lorenpc:runtime render
-
-tellraw @s {text:"------------------------",color:"dark_gray"}
+# Mostrar la ventana al jugador.
+function lorenpc:internal/dialogo/mostrar_ventana with storage lorenpc:runtime ui
