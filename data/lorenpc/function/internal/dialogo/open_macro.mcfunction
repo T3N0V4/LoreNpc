@@ -1,21 +1,30 @@
-# LoreNPC - Apertura de conversación
-# Macro: id = identificador del NPC seleccionado.
+# Macro: id
+# Carga los datos y genera las preguntas.
 
-# Cargar los datos del NPC.
 $data modify storage lorenpc:runtime npc set from storage lorenpc:db npcs.n$(id)
 
-# Encabezado del diálogo.
+data modify storage lorenpc:runtime render set value {}
+data modify storage lorenpc:runtime render.nombre set from storage lorenpc:runtime npc.nombre
+
 tellraw @s {text:"------------------------",color:"dark_gray"}
-tellraw @s [{text:"Hablando con: ",color:"gray"},{nbt:"npc.nombre",storage:"lorenpc:runtime",interpret:false,color:"gold",bold:true}]
+
+function lorenpc:internal/dialogo/render_nombre with storage lorenpc:runtime render
+
 tellraw @s {text:"Elegí una pregunta:",color:"yellow"}
 
-# Pregunta 1
-execute if data storage lorenpc:runtime npc.questions.n0.q run tellraw @s [{text:"[1] ",color:"aqua"},{nbt:"npc.questions.n0.q",storage:"lorenpc:runtime",interpret:false,color:"aqua",click_event:{action:"run_command",command:"/trigger ln_choice set 1"},hover_event:{action:"show_text",value:{text:"Preguntar",color:"green"}}}]
+# Primera pregunta
+execute if data storage lorenpc:runtime npc.questions.n0.q run data modify storage lorenpc:runtime render set value {numero:1}
+execute if data storage lorenpc:runtime npc.questions.n0.q run data modify storage lorenpc:runtime render.texto set from storage lorenpc:runtime npc.questions.n0.q
+execute if data storage lorenpc:runtime npc.questions.n0.q run function lorenpc:internal/dialogo/render_pregunta with storage lorenpc:runtime render
 
-# Pregunta 2
-execute if data storage lorenpc:runtime npc.questions.n1.q run tellraw @s [{text:"[2] ",color:"aqua"},{nbt:"npc.questions.n1.q",storage:"lorenpc:runtime",interpret:false,color:"aqua",click_event:{action:"run_command",command:"/trigger ln_choice set 2"},hover_event:{action:"show_text",value:{text:"Preguntar",color:"green"}}}]
+# Segunda pregunta
+execute if data storage lorenpc:runtime npc.questions.n1.q run data modify storage lorenpc:runtime render set value {numero:2}
+execute if data storage lorenpc:runtime npc.questions.n1.q run data modify storage lorenpc:runtime render.texto set from storage lorenpc:runtime npc.questions.n1.q
+execute if data storage lorenpc:runtime npc.questions.n1.q run function lorenpc:internal/dialogo/render_pregunta with storage lorenpc:runtime render
 
-# Pregunta 3
-execute if data storage lorenpc:runtime npc.questions.n2.q run tellraw @s [{text:"[3] ",color:"aqua"},{nbt:"npc.questions.n2.q",storage:"lorenpc:runtime",interpret:false,color:"aqua",click_event:{action:"run_command",command:"/trigger ln_choice set 3"},hover_event:{action:"show_text",value:{text:"Preguntar",color:"green"}}}]
+# Tercera pregunta
+execute if data storage lorenpc:runtime npc.questions.n2.q run data modify storage lorenpc:runtime render set value {numero:3}
+execute if data storage lorenpc:runtime npc.questions.n2.q run data modify storage lorenpc:runtime render.texto set from storage lorenpc:runtime npc.questions.n2.q
+execute if data storage lorenpc:runtime npc.questions.n2.q run function lorenpc:internal/dialogo/render_pregunta with storage lorenpc:runtime render
 
 tellraw @s {text:"------------------------",color:"dark_gray"}
