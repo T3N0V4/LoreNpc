@@ -1,5 +1,7 @@
-# Crea un NPC nuevo en la posición del ejecutor.
 # Argumentos: id, nombre
+
+$scoreboard players set #target ln_id $(id)
+execute unless score #target ln_id matches 1.. run return fail
 
 $execute if data storage lorenpc:db npcs.n$(id) run tellraw @s {text:"[LoreNPC] Ese ID ya existe.",color:"red"}
 $execute if data storage lorenpc:db npcs.n$(id) run return fail
