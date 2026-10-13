@@ -1,4 +1,32 @@
-﻿.vscode/
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Archivos de Windows
+Thumbs.db
+Desktop.ini
+
+# Pruebas locales
 tests/server/
-*.log
+tests/world/
+tests/logs/
+tests/temp/
+
+# Minecraft
+logs/
+crash-reports/
+world/
+eula.txt
+server.properties
+
+# Archivos generados
 *.zip
+*.log
+*.tmp
+*.bak
+
+# Python
+__pycache__/
+*.pyc
+.venv/
